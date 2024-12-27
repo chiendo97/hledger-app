@@ -33,8 +33,9 @@ export interface IncomeStatementData {
 }
 
 export interface TransactionData {
+  index: number;
   date: string;         // Date of the transaction
-  id: number;           // Unique identifier for the transaction
+  id: string;           // Unique identifier for the transaction
   description: string;  // Description of the transaction
   amount: number;       // The monetary amount involved in the transaction
   currency: string;     // Currency code (e.g., 'vnd')

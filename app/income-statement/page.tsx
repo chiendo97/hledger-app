@@ -116,7 +116,7 @@ export default function IncomeStatement() {
                   {date.toLocaleString('default', { month: 'long' })}
                 </SelectItem>
               )
-            })}
+            }).reverse()}
           </SelectContent>
         </Select>
       </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { NestedLevelSelector } from '@/components/NestedLevelSelector'
-import { BalanceSheet } from '../interfaces'
+import { BalanceSheetData } from '../interfaces'
 import { fetchBalanceSheet } from '../apis'
 
 // Dummy data
@@ -37,7 +37,7 @@ function groupByNestedLevel(items: any[], level: number) {
 }
 
 export default function BalanceSheet() {
-  const [data, setData] = useState<BalanceSheet>(balanceSheetData)
+  const [data, setData] = useState<BalanceSheetData>(balanceSheetData)
   const [nestedLevel, setNestedLevel] = useState(2)
 
   useEffect(() => {

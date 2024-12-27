@@ -5,15 +5,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { fetchTransactions } from '../apis'
 import { TransactionData } from '../interfaces'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+const currentYear = new Date().getFullYear()
+const currentMonth = new Date().toISOString().slice(0, 7)
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState<TransactionData[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth)
 
   useEffect(() => {
     fetchTransactions().then(transactions => {
-      setTransactions(transactions.reverse().sort((t1, t2) => t2.id - t1.id).slice(0, 10))
+      setTransactions(transactions.reverse().sort((t1, t2) => {
+        if (t1.date === t2.date) {
+          return t2.index - t1.index
+        }
+        return t2.date.localeCompare(t1.date)
+      }))
     })
   }, [])
 
@@ -25,39 +35,62 @@ export default function Transactions() {
     setCategoryFilter(category)
   }
 
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month)
+  }
+
   const sortedTransactions = useMemo(() => {
-    const filtered = transactions.filter(transaction =>
-      (transaction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        transaction.category.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      (categoryFilter === '' || transaction.category.toLowerCase().includes(categoryFilter.toLowerCase()))
-    )
-    return filtered
-  }, [searchQuery, categoryFilter, transactions])
+    return transactions.filter(transaction => {
+      if (searchQuery !== '' && !transaction.description.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      if (categoryFilter !== '' && !transaction.category.toLowerCase().includes(categoryFilter.toLowerCase())) {
+        return false;
+      }
+      if (selectedMonth !== 'total' && !transaction.date.startsWith(selectedMonth)) {
+        return false;
+      }
+      return true;
+    }).slice(0, 200)
+  }, [searchQuery, categoryFilter, transactions, selectedMonth])
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Transactions</h1>
       <div className="flex flex-wrap gap-4">
-        <div className="w-full md:w-1/2">
-          <Label htmlFor="search">Search</Label>
-          <Input
-            id="search"
-            type="text"
-            placeholder="Search transactions..."
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-          />
-        </div>
-        <div className="w-full md:w-1/2">
-          <Label htmlFor="category">Filter by Category</Label>
-          <Input
-            id="category"
-            type="text"
-            placeholder="Enter category..."
-            value={categoryFilter}
-            onChange={(e) => handleCategoryFilter(e.target.value)}
-          />
-        </div>
+        <Input
+          className="w-[180px]"
+          id="search"
+          type="text"
+          placeholder="Search transactions..."
+          value={searchQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+        />
+        <Input
+          className="w-[180px]"
+          id="category"
+          type="text"
+          placeholder="Enter category..."
+          value={categoryFilter}
+          onChange={(e) => handleCategoryFilter(e.target.value)}
+        />
+        <Select onValueChange={handleMonthChange} defaultValue={selectedMonth}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select month" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="total">Total</SelectItem>
+            {Array.from({ length: 12 }, (_, i) => {
+              const date = new Date(currentYear, i, 15)
+              const monthStr = date.toISOString().slice(0, 7)
+              return (
+                <SelectItem key={monthStr} value={monthStr}>
+                  {date.toLocaleString('default', { month: 'long' })}
+                </SelectItem>
+              )
+            }).reverse()}
+          </SelectContent>
+        </Select>
       </div>
       <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
         <div className="overflow-x-auto">

@@ -114,14 +114,15 @@ export async function fetchTransactions(): Promise<TransactionData[]> {
 
   // Assuming your response structure is consistent, we process it
   for (const transaction of transactionsData) {
-    if (transaction.tpostings.length < 2) {
+    if (transaction.tpostings.length !== 2) {
       continue;
     }
 
     const date = transaction.tdate;
     const description = transaction.tdescription;
     const posting = transaction.tpostings[0];
-    const transactionID = transaction.tindex;
+    const index = transaction.tindex;
+    const transactionID = transaction.ttags[transaction.ttags.length - 1][transaction.ttags[transaction.ttags.length - 1].length - 1];
 
     if (posting.pamount.length === 0) {
       continue
@@ -133,6 +134,7 @@ export async function fetchTransactions(): Promise<TransactionData[]> {
     const amount = posting.pamount[0].aquantity.floatingPoint;
 
     transactions.push({
+      index: index,
       date: date,
       id: transactionID,
       description: description,
