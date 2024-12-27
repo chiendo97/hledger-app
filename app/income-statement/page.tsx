@@ -1,42 +1,13 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { NestedLevelSelector } from '@/components/NestedLevelSelector'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-// Dummy data for a full year
-const generateYearlyData = (year: number) => {
-  const months = Array.from({ length: 12 }, (_, i) => {
-    const date = new Date(year, i, 1)
-    return date.toISOString().slice(0, 7) // YYYY-MM format
-  })
-
-  const categories = ['salary', 'interest', 'misc', 'transit', 'family', 'dining', 'rent']
-
-  return {
-    startDate: `${year}-01-01`,
-    endDate: `${year}-12-31`,
-    revenues: months.flatMap(month => 
-      categories.slice(0, 2).map(category => ({
-        name: `revenue:${category}`,
-        amount: Math.floor(Math.random() * 1000000) + 500000,
-        currency: 'vnd',
-        date: `${month}-15`
-      }))
-    ),
-    expenses: months.flatMap(month => 
-      categories.slice(2).map(category => ({
-        name: `expense:${category}`,
-        amount: Math.floor(Math.random() * 500000) + 100000,
-        currency: 'vnd',
-        date: `${month}-${Math.floor(Math.random() * 28) + 1}`
-      }))
-    )
-  }
-}
+import { IncomeStatementData } from '../interfaces'
+import { fetchIncomeStatement } from '../apis'
 
 const currentYear = new Date().getFullYear()
-const incomeStatementData = generateYearlyData(currentYear)
+const currentMonth = new Date().toISOString().slice(0, 7)
 
 function sortByAmountAndCurrency(items: any[]) {
   return items.sort((a, b) => {
@@ -51,7 +22,7 @@ function groupByNestedLevel(items: any[], level: number) {
   return items.reduce((acc, item) => {
     const key = item.name.split(':').slice(0, level).join(':')
     if (!acc[key]) {
-      acc[key] = { ...item, children: [], amount: 0 }
+      acc[key] = { ...item, children: [], amount: 0, name: key }
     }
     acc[key].amount += item.amount
     if (item.name.split(':').length > level) {
@@ -62,10 +33,19 @@ function groupByNestedLevel(items: any[], level: number) {
 }
 
 export default function IncomeStatement() {
-  const [data, setData] = useState(incomeStatementData)
+  const [data, setData] = useState<IncomeStatementData>({
+    startDate: ``,
+    endDate: ``,
+    revenues: [],
+    expenses: [],
+  })
   const [nestedLevel, setNestedLevel] = useState(2)
   const [selectedYear, setSelectedYear] = useState(currentYear)
-  const [selectedMonth, setSelectedMonth] = useState('total')
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth)
+
+  useEffect(() => {
+    fetchIncomeStatement().then(setData)
+  }, [])
 
   const handleLevelChange = (level: number) => {
     setNestedLevel(level)
@@ -74,7 +54,6 @@ export default function IncomeStatement() {
   const handleYearChange = (year: string) => {
     const newYear = parseInt(year)
     setSelectedYear(newYear)
-    setData(generateYearlyData(newYear))
   }
 
   const handleMonthChange = (month: string) => {
@@ -130,7 +109,7 @@ export default function IncomeStatement() {
           <SelectContent>
             <SelectItem value="total">Total</SelectItem>
             {Array.from({ length: 12 }, (_, i) => {
-              const date = new Date(selectedYear, i, 1)
+              const date = new Date(selectedYear, i, 15)
               const monthStr = date.toISOString().slice(0, 7)
               return (
                 <SelectItem key={monthStr} value={monthStr}>

@@ -1,76 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-// Dummy data
-const transactionsData = [
-  {
-    date: '2024-12-26',
-    id: '436112436643',
-    description: 'tran_id:126S24C17GBCU52B',
-    amount: 423200,
-    currency: 'vnd',
-    category: 'expense:family:meo',
-    account: 'asset:vietinbank:checking',
-  },
-  {
-    date: '2024-12-26',
-    id: '126k24c17vj7uycg',
-    description: 'Le tien chien chuyen tien hoa qua cho meo',
-    amount: 292000,
-    currency: 'vnd',
-    category: 'expense:family:meo',
-    account: 'asset:vietinbank:checking',
-  },
-  {
-    date: '2024-12-25',
-    id: '126j24c17vj7uyca',
-    description: 'Salary payment',
-    amount: 10000000,
-    currency: 'vnd',
-    category: 'income:salary',
-    account: 'asset:vietinbank:checking',
-  },
-  // Add more transactions here...
-]
-
-function sortByAmountAndCurrency(items: any[]) {
-  return items.sort((a, b) => {
-    if (a.currency !== b.currency) {
-      return a.currency.localeCompare(b.currency)
-    }
-    return b.amount - a.amount
-  })
-}
+import { fetchTransactions } from '../apis'
+import { TransactionData } from '../interfaces'
 
 export default function Transactions() {
-  const [transactions, setTransactions] = useState(transactionsData)
-  const [filteredTransactions, setFilteredTransactions] = useState(transactionsData)
+  const [transactions, setTransactions] = useState<TransactionData[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
 
+  useEffect(() => {
+    fetchTransactions().then(transactions => {
+      setTransactions(transactions.reverse().sort((t1, t2) => t2.id - t1.id).slice(0, 10))
+    })
+  }, [])
+
   const handleSearch = (query: string) => {
     setSearchQuery(query)
-    filterTransactions(query, categoryFilter)
   }
 
   const handleCategoryFilter = (category: string) => {
     setCategoryFilter(category)
-    filterTransactions(searchQuery, category)
   }
 
-  const filterTransactions = (query: string, category: string) => {
+  const sortedTransactions = useMemo(() => {
     const filtered = transactions.filter(transaction =>
-      (transaction.description.toLowerCase().includes(query.toLowerCase()) ||
-       transaction.category.toLowerCase().includes(query.toLowerCase())) &&
-      (category === '' || transaction.category.toLowerCase().includes(category.toLowerCase()))
+      (transaction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        transaction.category.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (categoryFilter === '' || transaction.category.toLowerCase().includes(categoryFilter.toLowerCase()))
     )
-    setFilteredTransactions(filtered)
-  }
-
-  const sortedTransactions = sortByAmountAndCurrency(filteredTransactions)
+    return filtered
+  }, [searchQuery, categoryFilter, transactions])
 
   return (
     <div className="space-y-6">

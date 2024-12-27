@@ -1,0 +1,21 @@
+GET http://127.0.0.1:5000/transactions
+
+###
+
+GET http://127.0.0.1:3000/api/transactions
+
+###
+
+GET http://127.0.0.1:5000/accounts
+
+###
+
+GET http://localhost:3000/api/accounts
+
+###
+
+GET http://127.0.0.1:5000/accountnames
+
+###
+
+GET http://127.0.0.1:5000/accounttransactions/asset:apartment:tecco

@@ -1,22 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NestedLevelSelector } from '@/components/NestedLevelSelector'
+import { BalanceSheet } from '../interfaces'
+import { fetchBalanceSheet } from '../apis'
 
 // Dummy data
 const balanceSheetData = {
   date: '2024-12-26',
-  assets: [
-    { name: 'asset:dbs:asdf', amount: 2630, currency: 'sgd' },
-    { name: 'asset:apartment:tecco', amount: 1900000000, currency: 'vnd' },
-    { name: 'asset:vietinbank:saving2', amount: 190000058, currency: 'vnd' },
-    { name: 'asset:vietinbank:saving3', amount: 150000000, currency: 'vnd' },
-    { name: 'asset:family:dad', amount: 100000000, currency: 'vnd' },
-    { name: 'asset:vietinbank:checking', amount: 86259744, currency: 'vnd' },
-    { name: 'asset:family:brother', amount: 50000000, currency: 'vnd' },
-    { name: 'asset:vietinbank:card', amount: 35893655, currency: 'vnd' },
-    { name: 'asset:vietinbank:credit', amount: -250464, currency: 'vnd' },
-  ],
+  assets: [],
   liabilities: [],
 }
 
@@ -45,8 +37,14 @@ function groupByNestedLevel(items: any[], level: number) {
 }
 
 export default function BalanceSheet() {
-  const [data, setData] = useState(balanceSheetData)
+  const [data, setData] = useState<BalanceSheet>(balanceSheetData)
   const [nestedLevel, setNestedLevel] = useState(2)
+
+  useEffect(() => {
+    fetchBalanceSheet(nestedLevel).then((data) => {
+      setData(data)
+    })
+  }, [nestedLevel])
 
   const handleLevelChange = (level: number) => {
     setNestedLevel(level)
@@ -93,10 +91,10 @@ export default function BalanceSheet() {
               <td colSpan={2} className="px-4 py-2 font-bold">Assets</td>
             </tr>
             {renderItems(data.assets, nestedLevel)}
-            <tr className="border-b border-muted-foreground/20">
+            {data.assets.length !== 0 && <tr className="border-b border-muted-foreground/20">
               <td className="px-4 py-2 text-right font-bold">Total Assets:</td>
               <td className="px-4 py-2 text-right">{netWorth}</td>
-            </tr>
+            </tr>}
             <tr className="border-b border-muted-foreground/20 bg-muted/50">
               <td colSpan={2} className="px-4 py-2 font-bold">Liabilities</td>
             </tr>
@@ -107,10 +105,12 @@ export default function BalanceSheet() {
             ) : (
               renderItems(data.liabilities, nestedLevel)
             )}
-            <tr className="border-b border-muted-foreground/20">
-              <td className="px-4 py-2 text-right font-bold">Total Liabilities:</td>
-              <td className="px-4 py-2 text-right">0</td>
-            </tr>
+            {data.liabilities.length !== 0 &&
+              <tr className="border-b border-muted-foreground/20">
+                <td className="px-4 py-2 text-right font-bold">Total Liabilities:</td>
+                <td className="px-4 py-2 text-right">0</td>
+              </tr>
+            }
             <tr className="bg-muted/50">
               <td className="px-4 py-2 text-right font-bold">Net Worth:</td>
               <td className="px-4 py-2 text-right">{netWorth}</td>
