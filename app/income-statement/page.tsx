@@ -3,13 +3,18 @@
 import { useState, useMemo, useEffect } from 'react'
 import { NestedLevelSelector } from '@/components/NestedLevelSelector'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { IncomeStatementData } from '../interfaces'
+import { Expense, IncomeStatementData, Revenue } from '../interfaces'
 import { fetchIncomeStatement } from '../apis'
 
 const currentYear = new Date().getFullYear()
 const currentMonth = new Date().toISOString().slice(0, 7)
 
-function sortByAmountAndCurrency(items: any[]) {
+function sortByAmountAndCurrency(items: {
+  amount: number;
+  children: Expense[] | Revenue[];
+  name: string;
+  currency: string;
+}[]) {
   return items.sort((a, b) => {
     if (a.currency !== b.currency) {
       return a.currency.localeCompare(b.currency)
@@ -18,7 +23,7 @@ function sortByAmountAndCurrency(items: any[]) {
   })
 }
 
-function groupByNestedLevel(items: any[], level: number) {
+function groupByNestedLevel(items: Expense[] | Revenue[], level: number) {
   return items.reduce((acc, item) => {
     const key = item.name.split(':').slice(0, level).join(':')
     if (!acc[key]) {
@@ -29,7 +34,14 @@ function groupByNestedLevel(items: any[], level: number) {
       acc[key].children.push(item)
     }
     return acc
-  }, {})
+  }, {} as {
+    [key: string]: {
+      amount: number;
+      children: Expense[] | Revenue[];
+      name: string;
+      currency: string;
+    }
+  })
 }
 
 export default function IncomeStatement() {
@@ -71,11 +83,11 @@ export default function IncomeStatement() {
     }
   }, [data, selectedMonth])
 
-  const renderItems = (items: any[], level: number) => {
+  const renderItems = (items: Expense[] | Revenue[], level: number) => {
     const groupedItems = groupByNestedLevel(items, level)
     const sortedItems = sortByAmountAndCurrency(Object.values(groupedItems))
 
-    return sortedItems.map((item: any, index: number) => (
+    return sortedItems.map((item, index: number) => (
       <tr key={index} className="border-b border-muted-foreground/20">
         <td className="px-4 py-2 text-left">{item.name}</td>
         <td className="px-4 py-2 text-right">{item.amount.toLocaleString()} {item.currency}</td>
@@ -83,8 +95,9 @@ export default function IncomeStatement() {
     ))
   }
 
-  const totalRevenues = filteredData.revenues.reduce((sum, item) => sum + item.amount, 0)
-  const totalExpenses = filteredData.expenses.reduce((sum, item) => sum + item.amount, 0)
+  const totalRevenues = useMemo(() => filteredData.revenues.reduce((sum, item) => sum + item.amount, 0), [filteredData]);
+  const totalExpenses = useMemo(() => filteredData.expenses.reduce((sum, item) => sum + item.amount, 0), [filteredData]);
+
   const netIncome = totalRevenues - totalExpenses
 
   return (
