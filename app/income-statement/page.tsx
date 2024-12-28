@@ -5,6 +5,7 @@ import { NestedLevelSelector } from '@/components/NestedLevelSelector'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Expense, IncomeStatementData, Revenue } from '../interfaces'
 import { fetchIncomeStatement } from '../apis'
+import Link from 'next/link'
 
 const currentYear = new Date().getFullYear()
 const currentMonth = new Date().toISOString().slice(0, 7)
@@ -89,9 +90,19 @@ export default function IncomeStatement() {
 
     return sortedItems.map((item, index: number) => (
       <tr key={index} className="border-b border-muted-foreground/20">
-        <td className="px-4 py-2 text-left">{item.name}</td>
-        <td className="px-4 py-2 text-right text-green-500">{item.amount.toLocaleString()} {item.currency}</td>
+        <td className="px-4 py-2 text-left">
+          <Link
+            href={`/transactions?category=${encodeURIComponent(item.name)}&month=${selectedMonth}`}
+            className="text-blue-500 hover:underline cursor-pointer"
+          >
+            {item.name}
+          </Link>
+        </td>
+        <td className="px-4 py-2 text-right text-green-500">
+          {item.amount.toLocaleString()} {item.currency}
+        </td>
       </tr>
+
     ))
   }
 

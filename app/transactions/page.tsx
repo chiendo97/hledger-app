@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { fetchTransactions } from '../apis'
 import { TransactionData } from '../interfaces'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -11,10 +11,13 @@ const currentYear = new Date().getFullYear()
 const currentMonth = new Date().toISOString().slice(0, 7)
 
 export default function Transactions() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
   const [transactions, setTransactions] = useState<TransactionData[]>([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('')
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth)
+  const [categoryFilter, setCategoryFilter] = useState(searchParams.get('category') || '')
+  const [selectedMonth, setSelectedMonth] = useState(searchParams.get('month') || currentMonth)
 
   useEffect(() => {
     fetchTransactions().then(transactions => {
@@ -31,12 +34,26 @@ export default function Transactions() {
     setSearchQuery(query)
   }
 
+  const updateURLParams = (params: { [key: string]: string }) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString())
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) {
+        newSearchParams.set(key, value)
+      } else {
+        newSearchParams.delete(key)
+      }
+    })
+    router.push(`/transactions?${newSearchParams.toString()}`)
+  }
+
   const handleCategoryFilter = (category: string) => {
     setCategoryFilter(category)
+    updateURLParams({ category })
   }
 
   const handleMonthChange = (month: string) => {
     setSelectedMonth(month)
+    updateURLParams({ month })
   }
 
   const sortedTransactions = useMemo(() => {
@@ -74,7 +91,7 @@ export default function Transactions() {
           value={categoryFilter}
           onChange={(e) => handleCategoryFilter(e.target.value)}
         />
-        <Select onValueChange={handleMonthChange} defaultValue={selectedMonth}>
+        <Select onValueChange={handleMonthChange} value={selectedMonth}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select month" />
           </SelectTrigger>
@@ -123,4 +140,3 @@ export default function Transactions() {
     </div>
   )
 }
-
