@@ -105,6 +105,7 @@ export async function fetchIncomeStatement(): Promise<IncomeStatementData> {
 
   return incomeStatementData;
 }
+
 export async function fetchTransactions(): Promise<TransactionData[]> {
 
   const transactions: TransactionData[] = [];
