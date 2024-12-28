@@ -109,8 +109,8 @@ export default function Transactions() {
                 <tr key={transaction.id} className="border-b border-muted-foreground/20">
                   <td className="px-4 py-2">{transaction.date}</td>
                   <td className="px-4 py-2">{transaction.description}</td>
-                  <td className="px-4 py-2 text-right">
-                    {transaction.amount.toLocaleString()} {transaction.currency.toUpperCase()}
+                  <td className={`px-4 py-2 text-right ${transaction.amount < 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {transaction.amount.toLocaleString()} {transaction.currency}
                   </td>
                   <td className="px-4 py-2">{transaction.category}</td>
                   <td className="px-4 py-2">{transaction.account}</td>

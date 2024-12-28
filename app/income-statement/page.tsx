@@ -90,7 +90,7 @@ export default function IncomeStatement() {
     return sortedItems.map((item, index: number) => (
       <tr key={index} className="border-b border-muted-foreground/20">
         <td className="px-4 py-2 text-left">{item.name}</td>
-        <td className="px-4 py-2 text-right">{item.amount.toLocaleString()} {item.currency}</td>
+        <td className="px-4 py-2 text-right text-green-500">{item.amount.toLocaleString()} {item.currency}</td>
       </tr>
     ))
   }
