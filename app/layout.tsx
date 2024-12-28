@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import Navigation from '@/components/Navigation'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { AppSidebar } from '@/components/app-sidebar'
 import { ThemeProvider } from '@/components/ThemeProvider'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -20,10 +21,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="min-h-screen bg-background text-foreground">
-            <Navigation />
-            <main className="container mx-auto px-4 py-8">
-              {children}
-            </main>
+            <SidebarProvider>
+              <AppSidebar />
+              <main className="container mx-auto px-4 py-8">
+                <SidebarTrigger />
+                {children}
+              </main>
+            </SidebarProvider>
           </div>
         </ThemeProvider>
       </body>
