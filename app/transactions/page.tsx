@@ -18,15 +18,11 @@ export default function Transactions() {
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get('category') || '')
   const [selectedMonth, setSelectedMonth] = useState(searchParams.get('month') || currentMonth)
+  const [sortBy, setSortBy] = useState('date') // New state for sorting
 
   useEffect(() => {
     fetchTransactions().then(transactions => {
-      setTransactions(transactions.reverse().sort((t1, t2) => {
-        if (t1.date === t2.date) {
-          return t2.index - t1.index
-        }
-        return t2.date.localeCompare(t1.date)
-      }))
+      setTransactions(transactions)
     })
   }, [])
 
@@ -56,8 +52,12 @@ export default function Transactions() {
     updateURLParams({ month })
   }
 
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort)
+  }
+
   const sortedTransactions = useMemo(() => {
-    return transactions.filter(transaction => {
+    let filtered = transactions.filter(transaction => {
       if (searchQuery !== '' && !transaction.description.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
@@ -68,8 +68,22 @@ export default function Transactions() {
         return false;
       }
       return true;
-    }).slice(0, 200)
-  }, [searchQuery, categoryFilter, transactions, selectedMonth])
+    })
+
+    // Sort based on the selected option
+    if (sortBy === 'date') {
+      filtered.sort((a, b) => {
+        if (a.date === b.date) {
+          return b.index - a.index
+        }
+        return b.date.localeCompare(a.date)
+      })
+    } else if (sortBy === 'amount') {
+      filtered.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+    }
+
+    return filtered.slice(0, 200)
+  }, [searchQuery, categoryFilter, transactions, selectedMonth, sortBy])
 
   return (
     <div className="space-y-6">
@@ -106,6 +120,16 @@ export default function Transactions() {
                 </SelectItem>
               )
             }).reverse()}
+          </SelectContent>
+        </Select>
+        {/* New Select component for sorting */}
+        <Select onValueChange={handleSortChange} value={sortBy}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date">Date</SelectItem>
+            <SelectItem value="amount">Amount</SelectItem>
           </SelectContent>
         </Select>
       </div>
