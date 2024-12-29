@@ -58,13 +58,15 @@ export default function Component() {
         />
         <ChartTooltip content={<ChartTooltipContent />} />
         <ChartLegend content={<ChartLegendContent />} />
-        <Bar dataKey="expense" fill="var(--color-desktop)" radius={4}>
-          <LabelList
-            position="top"
-            offset={12}
-            className="fill-foreground"
-            fontSize={12}
-          />
+        <Bar dataKey="expense" fill="var(--color-desktop)" radius={4} label={(props) => {
+          const { x, y, width, value } = props;
+
+          return (
+            <text x={x + width / 2} y={y} fill="#666" textAnchor="middle" dy={-6}>
+              {value.toLocaleString()}
+            </text>
+          );
+        }}>
         </Bar>
       </BarChart>
     </ChartContainer>
