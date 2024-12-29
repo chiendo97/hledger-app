@@ -1,20 +1,32 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 
-const DateRangeSelector = ({ onDateChange }: { onDateChange: (startDate: string, endDate: string) => void }) => {
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+const DateRangeSelector = ({
+  onDateChange,
+}: {
+  onDateChange: (startDate: string, endDate: string) => void;
+}) => {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onDateChange(startDate, endDate)
-  }
+    e.preventDefault();
+    onDateChange(startDate, endDate);
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end space-x-2 mb-4">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-wrap items-end space-x-2 mb-4"
+    >
       <div>
-        <label htmlFor="start-date" className="block text-sm font-medium text-gray-700">Start Date</label>
+        <label
+          htmlFor="start-date"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Start Date
+        </label>
         <input
           type="date"
           id="start-date"
@@ -24,7 +36,12 @@ const DateRangeSelector = ({ onDateChange }: { onDateChange: (startDate: string,
         />
       </div>
       <div>
-        <label htmlFor="end-date" className="block text-sm font-medium text-gray-700">End Date</label>
+        <label
+          htmlFor="end-date"
+          className="block text-sm font-medium text-gray-700"
+        >
+          End Date
+        </label>
         <input
           type="date"
           id="end-date"
@@ -40,8 +57,7 @@ const DateRangeSelector = ({ onDateChange }: { onDateChange: (startDate: string,
         Apply
       </button>
     </form>
-  )
-}
+  );
+};
 
-export default DateRangeSelector
-
+export default DateRangeSelector;

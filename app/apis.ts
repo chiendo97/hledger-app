@@ -1,44 +1,42 @@
-import { BalanceSheetData, IncomeStatementData, TransactionData } from "./interfaces";
+import {
+  BalanceSheetData,
+  IncomeStatementData,
+  TransactionData,
+} from "./interfaces";
 
-
-
-
-
-
-
-
-export async function fetchBalanceSheet(level: number): Promise<BalanceSheetData> {
+export async function fetchBalanceSheet(
+  level: number,
+): Promise<BalanceSheetData> {
   if (level < 1) {
-    throw new Error('Invalid level');
+    throw new Error("Invalid level");
   }
 
   if (level > 3) {
-    throw new Error('Level too deep');
+    throw new Error("Level too deep");
   }
 
   // Declare a BalanceSheetData object
   const balanceSheetData: BalanceSheetData = {
-    date: new Date().toISOString().split('T')[0], // Replace with your actual date logic
+    date: new Date().toISOString().split("T")[0], // Replace with your actual date logic
     assets: [],
-    liabilities: []
+    liabilities: [],
   };
 
-  const response = await fetch('/api/accounts');
+  const response = await fetch("/api/accounts");
   const accountsData = await response.json();
 
   // Assuming your response structure is consistent, we process it
   for (const account of accountsData) {
-    const assetName = account.aname
+    const assetName = account.aname;
 
-    const assetLevel = assetName.split(':').length
+    const assetLevel = assetName.split(":").length;
     if (assetLevel !== level) {
       continue;
     }
 
-    if ('asset' !== assetName.split(':')[0]) {
+    if ("asset" !== assetName.split(":")[0]) {
       continue;
     }
-
 
     for (const entry of account.aibalance) {
       const currency = entry.acommodity;
@@ -51,7 +49,7 @@ export async function fetchBalanceSheet(level: number): Promise<BalanceSheetData
       balanceSheetData.assets.push({
         name: assetName,
         amount: amount,
-        currency: currency
+        currency: currency,
       });
     }
   }
@@ -62,13 +60,13 @@ export async function fetchBalanceSheet(level: number): Promise<BalanceSheetData
 export async function fetchIncomeStatement(): Promise<IncomeStatementData> {
   // Declare a BalanceSheetData object
   const incomeStatementData: IncomeStatementData = {
-    startDate: '', // Populate this with a valid start date logic
-    endDate: '',   // Populate this with a valid end date logic
+    startDate: "", // Populate this with a valid start date logic
+    endDate: "", // Populate this with a valid end date logic
     revenues: [],
-    expenses: []
+    expenses: [],
   };
 
-  const response = await fetch('/api/transactions');
+  const response = await fetch("/api/transactions");
   const transactionsData = await response.json();
 
   // Assuming your response structure is consistent, we process it
@@ -77,21 +75,21 @@ export async function fetchIncomeStatement(): Promise<IncomeStatementData> {
 
     for (const posting of transaction.tpostings) {
       if (posting.pamount.length === 0) {
-        continue
+        continue;
       }
 
       const account = posting.paccount;
       const currency = posting.pamount[0].acommodity;
       const amount = posting.pamount[0].aquantity.floatingPoint;
 
-      if ('expense' === account.split(':')[0]) {
+      if ("expense" === account.split(":")[0]) {
         incomeStatementData.expenses.push({
           name: account,
           amount: amount,
           currency: currency,
           date: date,
         });
-      } else if ('revenue' === account.split(':')[0]) {
+      } else if ("revenue" === account.split(":")[0]) {
         incomeStatementData.revenues.push({
           name: account,
           amount: -1 * amount,
@@ -100,17 +98,15 @@ export async function fetchIncomeStatement(): Promise<IncomeStatementData> {
         });
       }
     }
-
   }
 
   return incomeStatementData;
 }
 
 export async function fetchTransactions(): Promise<TransactionData[]> {
-
   const transactions: TransactionData[] = [];
 
-  const response = await fetch('/api/transactions');
+  const response = await fetch("/api/transactions");
   const transactionsData = await response.json();
 
   // Assuming your response structure is consistent, we process it
@@ -123,10 +119,13 @@ export async function fetchTransactions(): Promise<TransactionData[]> {
     const description = transaction.tdescription;
     const posting = transaction.tpostings[0];
     const index = transaction.tindex;
-    const transactionID = transaction.ttags[transaction.ttags.length - 1][transaction.ttags[transaction.ttags.length - 1].length - 1];
+    const transactionID =
+      transaction.ttags[transaction.ttags.length - 1][
+        transaction.ttags[transaction.ttags.length - 1].length - 1
+      ];
 
     if (posting.pamount.length === 0) {
-      continue
+      continue;
     }
 
     const category = posting.paccount;
@@ -143,8 +142,7 @@ export async function fetchTransactions(): Promise<TransactionData[]> {
       currency: currency,
       category: category,
       account: account,
-    })
-
+    });
   }
 
   return transactions;

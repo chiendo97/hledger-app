@@ -1,11 +1,17 @@
-'use client'
+"use client";
 
-import { useState, useMemo, useEffect } from 'react'
-import { NestedLevelSelector } from '@/components/NestedLevelSelector'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Expense, IncomeStatementData, Revenue } from '../interfaces'
-import { fetchIncomeStatement } from '../apis'
-import Link from 'next/link'
+import { useState, useMemo, useEffect } from "react";
+import { NestedLevelSelector } from "@/components/NestedLevelSelector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Expense, IncomeStatementData, Revenue } from "../interfaces";
+import { fetchIncomeStatement } from "../apis";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -13,44 +19,49 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
-const currentYear = new Date().getFullYear()
-const currentMonth = new Date().toISOString().slice(0, 7)
+const currentYear = new Date().getFullYear();
+const currentMonth = new Date().toISOString().slice(0, 7);
 
-function sortByAmountAndCurrency(items: {
-  amount: number;
-  children: Expense[] | Revenue[];
-  name: string;
-  currency: string;
-}[]) {
+function sortByAmountAndCurrency(
+  items: {
+    amount: number;
+    children: Expense[] | Revenue[];
+    name: string;
+    currency: string;
+  }[],
+) {
   return items.sort((a, b) => {
     if (a.currency !== b.currency) {
-      return a.currency.localeCompare(b.currency)
+      return a.currency.localeCompare(b.currency);
     }
-    return b.amount - a.amount
-  })
+    return b.amount - a.amount;
+  });
 }
 
 function groupByNestedLevel(items: Expense[] | Revenue[], level: number) {
-  return items.reduce((acc, item) => {
-    const key = item.name.split(':').slice(0, level).join(':')
-    if (!acc[key]) {
-      acc[key] = { ...item, children: [], amount: 0, name: key }
-    }
-    acc[key].amount += item.amount
-    if (item.name.split(':').length > level) {
-      acc[key].children.push(item)
-    }
-    return acc
-  }, {} as {
-    [key: string]: {
-      amount: number;
-      children: Expense[] | Revenue[];
-      name: string;
-      currency: string;
-    }
-  })
+  return items.reduce(
+    (acc, item) => {
+      const key = item.name.split(":").slice(0, level).join(":");
+      if (!acc[key]) {
+        acc[key] = { ...item, children: [], amount: 0, name: key };
+      }
+      acc[key].amount += item.amount;
+      if (item.name.split(":").length > level) {
+        acc[key].children.push(item);
+      }
+      return acc;
+    },
+    {} as {
+      [key: string]: {
+        amount: number;
+        children: Expense[] | Revenue[];
+        name: string;
+        currency: string;
+      };
+    },
+  );
 }
 
 export default function IncomeStatement() {
@@ -59,42 +70,46 @@ export default function IncomeStatement() {
     endDate: ``,
     revenues: [],
     expenses: [],
-  })
-  const [nestedLevel, setNestedLevel] = useState(2)
-  const [selectedYear, setSelectedYear] = useState(currentYear)
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth)
+  });
+  const [nestedLevel, setNestedLevel] = useState(2);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
   useEffect(() => {
-    fetchIncomeStatement().then(setData)
-  }, [])
+    fetchIncomeStatement().then(setData);
+  }, []);
 
   const handleLevelChange = (level: number) => {
-    setNestedLevel(level)
-  }
+    setNestedLevel(level);
+  };
 
   const handleYearChange = (year: string) => {
-    const newYear = parseInt(year)
-    setSelectedYear(newYear)
-  }
+    const newYear = parseInt(year);
+    setSelectedYear(newYear);
+  };
 
   const handleMonthChange = (month: string) => {
-    setSelectedMonth(month)
-  }
+    setSelectedMonth(month);
+  };
 
   const filteredData = useMemo(() => {
-    if (selectedMonth === 'total') {
-      return data
+    if (selectedMonth === "total") {
+      return data;
     }
     return {
       ...data,
-      revenues: data.revenues.filter(item => item.date.startsWith(selectedMonth)),
-      expenses: data.expenses.filter(item => item.date.startsWith(selectedMonth)),
-    }
-  }, [data, selectedMonth])
+      revenues: data.revenues.filter((item) =>
+        item.date.startsWith(selectedMonth),
+      ),
+      expenses: data.expenses.filter((item) =>
+        item.date.startsWith(selectedMonth),
+      ),
+    };
+  }, [data, selectedMonth]);
 
   const renderItems = (items: Expense[] | Revenue[], level: number) => {
-    const groupedItems = groupByNestedLevel(items, level)
-    const sortedItems = sortByAmountAndCurrency(Object.values(groupedItems))
+    const groupedItems = groupByNestedLevel(items, level);
+    const sortedItems = sortByAmountAndCurrency(Object.values(groupedItems));
 
     return sortedItems.map((item, index: number) => (
       <TableRow key={index}>
@@ -110,27 +125,37 @@ export default function IncomeStatement() {
           {item.amount.toLocaleString()} {item.currency}
         </TableCell>
       </TableRow>
+    ));
+  };
 
-    ))
-  }
+  const totalRevenues = useMemo(
+    () => filteredData.revenues.reduce((sum, item) => sum + item.amount, 0),
+    [filteredData],
+  );
+  const totalExpenses = useMemo(
+    () => filteredData.expenses.reduce((sum, item) => sum + item.amount, 0),
+    [filteredData],
+  );
 
-  const totalRevenues = useMemo(() => filteredData.revenues.reduce((sum, item) => sum + item.amount, 0), [filteredData]);
-  const totalExpenses = useMemo(() => filteredData.expenses.reduce((sum, item) => sum + item.amount, 0), [filteredData]);
-
-  const netIncome = totalRevenues - totalExpenses
+  const netIncome = totalRevenues - totalExpenses;
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Income Statement</h1>
       <div className="flex flex-wrap gap-4">
         <NestedLevelSelector onLevelChange={handleLevelChange} />
-        <Select onValueChange={handleYearChange} defaultValue={selectedYear.toString()}>
+        <Select
+          onValueChange={handleYearChange}
+          defaultValue={selectedYear.toString()}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
           <SelectContent>
-            {[currentYear - 1, currentYear, currentYear + 1].map(year => (
-              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+            {[currentYear - 1, currentYear, currentYear + 1].map((year) => (
+              <SelectItem key={year} value={year.toString()}>
+                {year}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -141,13 +166,13 @@ export default function IncomeStatement() {
           <SelectContent>
             <SelectItem value="total">Total</SelectItem>
             {Array.from({ length: 12 }, (_, i) => {
-              const date = new Date(selectedYear, i, 15)
-              const monthStr = date.toISOString().slice(0, 7)
+              const date = new Date(selectedYear, i, 15);
+              const monthStr = date.toISOString().slice(0, 7);
               return (
                 <SelectItem key={monthStr} value={monthStr}>
-                  {date.toLocaleString('default', { month: 'long' })}
+                  {date.toLocaleString("default", { month: "long" })}
                 </SelectItem>
-              )
+              );
             }).reverse()}
           </SelectContent>
         </Select>
@@ -162,29 +187,38 @@ export default function IncomeStatement() {
           </TableHeader>
           <TableBody>
             <TableRow className="bg-muted/50">
-              <TableCell colSpan={2} className="font-bold">Revenues</TableCell>
+              <TableCell colSpan={2} className="font-bold">
+                Revenues
+              </TableCell>
             </TableRow>
             {renderItems(filteredData.revenues, nestedLevel)}
             <TableRow className="font-bold">
               <TableCell className="text-right">Total Revenues:</TableCell>
-              <TableCell className="text-right">{totalRevenues.toLocaleString()} vnd</TableCell>
+              <TableCell className="text-right">
+                {totalRevenues.toLocaleString()} vnd
+              </TableCell>
             </TableRow>
             <TableRow className="bg-muted/50">
-              <TableCell colSpan={2} className="font-bold">Expenses</TableCell>
+              <TableCell colSpan={2} className="font-bold">
+                Expenses
+              </TableCell>
             </TableRow>
             {renderItems(filteredData.expenses, nestedLevel)}
             <TableRow className="font-bold">
               <TableCell className="text-right">Total Expenses:</TableCell>
-              <TableCell className="text-right">{totalExpenses.toLocaleString()} vnd</TableCell>
+              <TableCell className="text-right">
+                {totalExpenses.toLocaleString()} vnd
+              </TableCell>
             </TableRow>
             <TableRow className="bg-muted/50 font-bold">
               <TableCell className="text-right">Net Income:</TableCell>
-              <TableCell className="text-right">{netIncome.toLocaleString()} vnd</TableCell>
+              <TableCell className="text-right">
+                {netIncome.toLocaleString()} vnd
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
       </div>
     </div>
-  )
+  );
 }
-

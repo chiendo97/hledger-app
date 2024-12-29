@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   Table,
@@ -7,92 +7,115 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
-import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { Input } from "@/components/ui/input"
-import { fetchTransactions } from '../apis'
-import { TransactionData } from '../interfaces'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { fetchTransactions } from "../apis";
+import { TransactionData } from "../interfaces";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const currentYear = new Date().getFullYear()
-const currentMonth = new Date().toISOString().slice(0, 7)
+const currentYear = new Date().getFullYear();
+const currentMonth = new Date().toISOString().slice(0, 7);
 
 export default function Transactions() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const [transactions, setTransactions] = useState<TransactionData[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState(searchParams.get('category') || '')
-  const [selectedMonth, setSelectedMonth] = useState(searchParams.get('month') || currentMonth)
-  const [sortBy, setSortBy] = useState('date') // New state for sorting
+  const [transactions, setTransactions] = useState<TransactionData[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState(
+    searchParams.get("category") || "",
+  );
+  const [selectedMonth, setSelectedMonth] = useState(
+    searchParams.get("month") || currentMonth,
+  );
+  const [sortBy, setSortBy] = useState("date"); // New state for sorting
 
   useEffect(() => {
-    fetchTransactions().then(transactions => {
-      setTransactions(transactions)
-    })
-  }, [])
+    fetchTransactions().then((transactions) => {
+      setTransactions(transactions);
+    });
+  }, []);
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query)
-  }
+    setSearchQuery(query);
+  };
 
   const updateURLParams = (params: { [key: string]: string }) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString())
+    const newSearchParams = new URLSearchParams(searchParams.toString());
     Object.entries(params).forEach(([key, value]) => {
       if (value) {
-        newSearchParams.set(key, value)
+        newSearchParams.set(key, value);
       } else {
-        newSearchParams.delete(key)
+        newSearchParams.delete(key);
       }
-    })
-    router.push(`/transactions?${newSearchParams.toString()}`)
-  }
+    });
+    router.push(`/transactions?${newSearchParams.toString()}`);
+  };
 
   const handleCategoryFilter = (category: string) => {
-    setCategoryFilter(category)
-    updateURLParams({ category })
-  }
+    setCategoryFilter(category);
+    updateURLParams({ category });
+  };
 
   const handleMonthChange = (month: string) => {
-    setSelectedMonth(month)
-    updateURLParams({ month })
-  }
+    setSelectedMonth(month);
+    updateURLParams({ month });
+  };
 
   const handleSortChange = (sort: string) => {
-    setSortBy(sort)
-  }
+    setSortBy(sort);
+  };
 
   const sortedTransactions = useMemo(() => {
-    const filtered = transactions.filter(transaction => {
-      if (searchQuery !== '' && !transaction.description.toLowerCase().includes(searchQuery.toLowerCase())) {
+    const filtered = transactions.filter((transaction) => {
+      if (
+        searchQuery !== "" &&
+        !transaction.description
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      ) {
         return false;
       }
-      if (categoryFilter !== '' && !transaction.category.toLowerCase().includes(categoryFilter.toLowerCase())) {
+      if (
+        categoryFilter !== "" &&
+        !transaction.category
+          .toLowerCase()
+          .includes(categoryFilter.toLowerCase())
+      ) {
         return false;
       }
-      if (selectedMonth !== 'total' && !transaction.date.startsWith(selectedMonth)) {
+      if (
+        selectedMonth !== "total" &&
+        !transaction.date.startsWith(selectedMonth)
+      ) {
         return false;
       }
       return true;
-    })
+    });
 
     // Sort based on the selected option
-    if (sortBy === 'date') {
+    if (sortBy === "date") {
       filtered.sort((a, b) => {
         if (a.date === b.date) {
-          return b.index - a.index
+          return b.index - a.index;
         }
-        return b.date.localeCompare(a.date)
-      })
-    } else if (sortBy === 'amount') {
-      filtered.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
+        return b.date.localeCompare(a.date);
+      });
+    } else if (sortBy === "amount") {
+      filtered.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
     }
 
-    return filtered.slice(0, 200)
-  }, [searchQuery, categoryFilter, transactions, selectedMonth, sortBy])
+    return filtered.slice(0, 200);
+  }, [searchQuery, categoryFilter, transactions, selectedMonth, sortBy]);
 
   return (
     <div className="space-y-6">
@@ -121,13 +144,13 @@ export default function Transactions() {
           <SelectContent>
             <SelectItem value="total">Total</SelectItem>
             {Array.from({ length: 12 }, (_, i) => {
-              const date = new Date(currentYear, i, 15)
-              const monthStr = date.toISOString().slice(0, 7)
+              const date = new Date(currentYear, i, 15);
+              const monthStr = date.toISOString().slice(0, 7);
               return (
                 <SelectItem key={monthStr} value={monthStr}>
-                  {date.toLocaleString('default', { month: 'long' })}
+                  {date.toLocaleString("default", { month: "long" })}
                 </SelectItem>
-              )
+              );
             }).reverse()}
           </SelectContent>
         </Select>
@@ -148,7 +171,9 @@ export default function Transactions() {
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="px-4 py-2 text-left">Date</TableHead>
-                <TableHead className="px-4 py-2 text-left">Description</TableHead>
+                <TableHead className="px-4 py-2 text-left">
+                  Description
+                </TableHead>
                 <TableHead className="px-4 py-2 text-right">Amount</TableHead>
                 <TableHead className="px-4 py-2 text-left">Category</TableHead>
                 <TableHead className="px-4 py-2 text-left">Account</TableHead>
@@ -156,14 +181,27 @@ export default function Transactions() {
             </TableHeader>
             <TableBody>
               {sortedTransactions.map((transaction) => (
-                <TableRow key={transaction.id} className="border-b border-muted-foreground/20">
-                  <TableCell className="px-4 py-2">{transaction.date}</TableCell>
-                  <TableCell className="px-4 py-2">{transaction.description}</TableCell>
-                  <TableCell className={`px-4 py-2 text-right ${transaction.amount < 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <TableRow
+                  key={transaction.id}
+                  className="border-b border-muted-foreground/20"
+                >
+                  <TableCell className="px-4 py-2">
+                    {transaction.date}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    {transaction.description}
+                  </TableCell>
+                  <TableCell
+                    className={`px-4 py-2 text-right ${transaction.amount < 0 ? "text-green-500" : "text-red-500"}`}
+                  >
                     {transaction.amount.toLocaleString()} {transaction.currency}
                   </TableCell>
-                  <TableCell className="px-4 py-2">{transaction.category}</TableCell>
-                  <TableCell className="px-4 py-2">{transaction.account}</TableCell>
+                  <TableCell className="px-4 py-2">
+                    {transaction.category}
+                  </TableCell>
+                  <TableCell className="px-4 py-2">
+                    {transaction.account}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -171,5 +209,5 @@ export default function Transactions() {
         </div>
       </div>
     </div>
-  )
+  );
 }

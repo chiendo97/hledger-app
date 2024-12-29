@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { ThemeToggle } from './ThemeToggle'
+import Link from "next/link";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Navigation = () => {
   return (
@@ -9,13 +9,30 @@ const Navigation = () => {
           <div className="flex space-x-7">
             <div>
               <Link href="/" className="flex items-center py-4 px-2">
-                <span className="font-semibold text-foreground text-lg">Financial Tracker</span>
+                <span className="font-semibold text-foreground text-lg">
+                  Financial Tracker
+                </span>
               </Link>
             </div>
             <div className="hidden md:flex items-center space-x-1">
-              <Link href="/balance-sheet" className="py-4 px-2 text-foreground font-semibold hover:text-primary transition duration-300">Balance Sheet</Link>
-              <Link href="/income-statement" className="py-4 px-2 text-foreground font-semibold hover:text-primary transition duration-300">Income Statement</Link>
-              <Link href="/transactions" className="py-4 px-2 text-foreground font-semibold hover:text-primary transition duration-300">Transactions</Link>
+              <Link
+                href="/balance-sheet"
+                className="py-4 px-2 text-foreground font-semibold hover:text-primary transition duration-300"
+              >
+                Balance Sheet
+              </Link>
+              <Link
+                href="/income-statement"
+                className="py-4 px-2 text-foreground font-semibold hover:text-primary transition duration-300"
+              >
+                Income Statement
+              </Link>
+              <Link
+                href="/transactions"
+                className="py-4 px-2 text-foreground font-semibold hover:text-primary transition duration-300"
+              >
+                Transactions
+              </Link>
             </div>
           </div>
           <div className="flex items-center">
@@ -24,8 +41,7 @@ const Navigation = () => {
         </div>
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Navigation
-
+export default Navigation;

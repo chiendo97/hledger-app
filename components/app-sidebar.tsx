@@ -1,4 +1,4 @@
-import { BadgeDollarSign, Home, Landmark, Scale } from "lucide-react"
+import { BadgeDollarSign, Home, Landmark, Scale } from "lucide-react";
 
 import {
   Sidebar,
@@ -9,8 +9,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { ThemeToggle } from "./ThemeToggle"
+} from "@/components/ui/sidebar";
+import { ThemeToggle } from "./ThemeToggle";
 
 // Menu items.
 const items = [
@@ -34,7 +34,7 @@ const items = [
     url: "transactions",
     icon: BadgeDollarSign,
   },
-]
+];
 
 export function AppSidebar() {
   return (
@@ -69,5 +69,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }
