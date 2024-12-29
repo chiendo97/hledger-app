@@ -1,4 +1,4 @@
-import { BadgeDollarSign, Calendar, Home, Inbox, Landmark, Scale, Search, Settings } from "lucide-react"
+import { BadgeDollarSign, Home, Landmark, Scale } from "lucide-react"
 
 import {
   Sidebar,

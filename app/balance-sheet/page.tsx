@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { NestedLevelSelector } from '@/components/NestedLevelSelector'
-import { BalanceSheetData } from '../interfaces'
+import { Asset, BalanceSheetData } from '../interfaces'
 import { fetchBalanceSheet } from '../apis'
 
 // Dummy data
@@ -12,7 +12,11 @@ const balanceSheetData = {
   liabilities: [],
 }
 
-function sortByAmountAndCurrency(items: any[]) {
+function sortByAmountAndCurrency(items: {
+  name: string;
+  amount: number;
+  currency: string;
+}[]) {
   return items.sort((a, b) => {
     if (a.currency !== b.currency) {
       return a.currency.localeCompare(b.currency)
@@ -21,19 +25,23 @@ function sortByAmountAndCurrency(items: any[]) {
   })
 }
 
-function groupByNestedLevel(items: any[], level: number) {
+function groupByNestedLevel(items: Asset[], level: number) {
   return items.reduce((acc, item) => {
     const key = item.name.split(':').slice(0, level).join(':')
     if (!acc[key]) {
-      acc[key] = { ...item, children: [] }
+      acc[key] = { ...item, }
     } else {
       acc[key].amount += item.amount
     }
-    if (item.name.split(':').length > level) {
-      acc[key].children.push(item)
-    }
+
     return acc
-  }, {})
+  }, {} as {
+    [key: string]: {
+      name: string;
+      amount: number;
+      currency: string;
+    }
+  })
 }
 
 export default function BalanceSheet() {
@@ -50,11 +58,11 @@ export default function BalanceSheet() {
     setNestedLevel(level)
   }
 
-  const renderItems = (items: any[], level: number) => {
+  const renderItems = (items: Asset[], level: number) => {
     const groupedItems = groupByNestedLevel(items, level)
     const sortedItems = sortByAmountAndCurrency(Object.values(groupedItems))
 
-    return sortedItems.map((item: any, index: number) => (
+    return sortedItems.map((item, index: number) => (
       <tr key={index} className="border-b border-muted-foreground/20">
         <td className="px-4 py-2 text-left">{item.name}</td>
         <td className="px-4 py-2 text-right text-green-500">{item.amount.toLocaleString()} {item.currency}</td>

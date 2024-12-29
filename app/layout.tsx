@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/app-sidebar'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,7 +26,7 @@ export default function RootLayout({
               <AppSidebar />
               <main className="container mx-auto px-4 py-8">
                 <SidebarTrigger />
-                {children}
+                <Suspense>{children}</Suspense>
               </main>
             </SidebarProvider>
           </div>
