@@ -170,11 +170,11 @@ export default function Transactions() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="px-4 py-2 text-left">Date</TableHead>
+                <TableHead className="px-4 py-2 text-left w-[115px]">Date</TableHead>
                 <TableHead className="px-4 py-2 text-left">
                   Description
                 </TableHead>
-                <TableHead className="px-4 py-2 text-right">Amount</TableHead>
+                <TableHead className="px-4 py-2 text-right w-[150px]">Amount</TableHead>
                 <TableHead className="px-4 py-2 text-left">Category</TableHead>
                 <TableHead className="px-4 py-2 text-left">Account</TableHead>
               </TableRow>
