@@ -1,5 +1,14 @@
 'use client'
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Input } from "@/components/ui/input"
@@ -135,30 +144,30 @@ export default function Transactions() {
       </div>
       <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="px-4 py-2 text-left">Date</th>
-                <th className="px-4 py-2 text-left">Description</th>
-                <th className="px-4 py-2 text-right">Amount</th>
-                <th className="px-4 py-2 text-left">Category</th>
-                <th className="px-4 py-2 text-left">Account</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="px-4 py-2 text-left">Date</TableHead>
+                <TableHead className="px-4 py-2 text-left">Description</TableHead>
+                <TableHead className="px-4 py-2 text-right">Amount</TableHead>
+                <TableHead className="px-4 py-2 text-left">Category</TableHead>
+                <TableHead className="px-4 py-2 text-left">Account</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {sortedTransactions.map((transaction) => (
-                <tr key={transaction.id} className="border-b border-muted-foreground/20">
-                  <td className="px-4 py-2">{transaction.date}</td>
-                  <td className="px-4 py-2">{transaction.description}</td>
-                  <td className={`px-4 py-2 text-right ${transaction.amount < 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <TableRow key={transaction.id} className="border-b border-muted-foreground/20">
+                  <TableCell className="px-4 py-2">{transaction.date}</TableCell>
+                  <TableCell className="px-4 py-2">{transaction.description}</TableCell>
+                  <TableCell className={`px-4 py-2 text-right ${transaction.amount < 0 ? 'text-green-500' : 'text-red-500'}`}>
                     {transaction.amount.toLocaleString()} {transaction.currency}
-                  </td>
-                  <td className="px-4 py-2">{transaction.category}</td>
-                  <td className="px-4 py-2">{transaction.account}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="px-4 py-2">{transaction.category}</TableCell>
+                  <TableCell className="px-4 py-2">{transaction.account}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>

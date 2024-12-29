@@ -6,6 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Expense, IncomeStatementData, Revenue } from '../interfaces'
 import { fetchIncomeStatement } from '../apis'
 import Link from 'next/link'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 const currentYear = new Date().getFullYear()
 const currentMonth = new Date().toISOString().slice(0, 7)
@@ -89,19 +97,19 @@ export default function IncomeStatement() {
     const sortedItems = sortByAmountAndCurrency(Object.values(groupedItems))
 
     return sortedItems.map((item, index: number) => (
-      <tr key={index} className="border-b border-muted-foreground/20">
-        <td className="px-4 py-2 text-left">
+      <TableRow key={index}>
+        <TableCell className="text-left">
           <Link
             href={`/transactions?category=${encodeURIComponent(item.name)}&month=${selectedMonth}`}
             className="text-blue-500 hover:underline cursor-pointer"
           >
             {item.name}
           </Link>
-        </td>
-        <td className="px-4 py-2 text-right text-green-500">
+        </TableCell>
+        <TableCell className="text-right text-green-500">
           {item.amount.toLocaleString()} {item.currency}
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
 
     ))
   }
@@ -145,36 +153,36 @@ export default function IncomeStatement() {
         </Select>
       </div>
       <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-muted-foreground/20">
-              <th className="px-4 py-2 text-left">Category</th>
-              <th className="px-4 py-2 text-right">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-muted-foreground/20 bg-muted/50">
-              <td colSpan={2} className="px-4 py-2 font-bold">Revenues</td>
-            </tr>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-left">Category</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow className="bg-muted/50">
+              <TableCell colSpan={2} className="font-bold">Revenues</TableCell>
+            </TableRow>
             {renderItems(filteredData.revenues, nestedLevel)}
-            <tr className="border-b border-muted-foreground/20 font-bold">
-              <td className="px-4 py-2 text-right">Total Revenues:</td>
-              <td className="px-4 py-2 text-right">{totalRevenues.toLocaleString()} vnd</td>
-            </tr>
-            <tr className="border-b border-muted-foreground/20 bg-muted/50">
-              <td colSpan={2} className="px-4 py-2 font-bold">Expenses</td>
-            </tr>
+            <TableRow className="font-bold">
+              <TableCell className="text-right">Total Revenues:</TableCell>
+              <TableCell className="text-right">{totalRevenues.toLocaleString()} vnd</TableCell>
+            </TableRow>
+            <TableRow className="bg-muted/50">
+              <TableCell colSpan={2} className="font-bold">Expenses</TableCell>
+            </TableRow>
             {renderItems(filteredData.expenses, nestedLevel)}
-            <tr className="border-b border-muted-foreground/20 font-bold">
-              <td className="px-4 py-2 text-right">Total Expenses:</td>
-              <td className="px-4 py-2 text-right">{totalExpenses.toLocaleString()} vnd</td>
-            </tr>
-            <tr className="bg-muted/50 font-bold">
-              <td className="px-4 py-2 text-right">Net Income:</td>
-              <td className="px-4 py-2 text-right">{netIncome.toLocaleString()} vnd</td>
-            </tr>
-          </tbody>
-        </table>
+            <TableRow className="font-bold">
+              <TableCell className="text-right">Total Expenses:</TableCell>
+              <TableCell className="text-right">{totalExpenses.toLocaleString()} vnd</TableCell>
+            </TableRow>
+            <TableRow className="bg-muted/50 font-bold">
+              <TableCell className="text-right">Net Income:</TableCell>
+              <TableCell className="text-right">{netIncome.toLocaleString()} vnd</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
     </div>
   )

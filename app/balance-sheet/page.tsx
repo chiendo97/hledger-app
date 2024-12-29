@@ -4,6 +4,14 @@ import { useEffect, useState } from 'react'
 import { NestedLevelSelector } from '@/components/NestedLevelSelector'
 import { Asset, BalanceSheetData } from '../interfaces'
 import { fetchBalanceSheet } from '../apis'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 // Dummy data
 const balanceSheetData = {
@@ -63,10 +71,10 @@ export default function BalanceSheet() {
     const sortedItems = sortByAmountAndCurrency(Object.values(groupedItems))
 
     return sortedItems.map((item, index: number) => (
-      <tr key={index} className="border-b border-muted-foreground/20">
-        <td className="px-4 py-2 text-left">{item.name}</td>
-        <td className="px-4 py-2 text-right text-green-500">{item.amount.toLocaleString()} {item.currency}</td>
-      </tr>
+      <TableRow key={index}>
+        <TableCell className="text-left">{item.name}</TableCell>
+        <TableCell className="text-right text-green-500">{item.amount.toLocaleString()} {item.currency}</TableCell>
+      </TableRow>
     ))
   }
 
@@ -87,44 +95,46 @@ export default function BalanceSheet() {
       <h1 className="text-3xl font-bold">Balance Sheet</h1>
       <NestedLevelSelector onLevelChange={handleLevelChange} />
       <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-muted-foreground/20">
-              <th className="px-4 py-2 text-left"></th>
-              <th className="px-4 py-2 text-right">{data.date}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-muted-foreground/20 bg-muted/50">
-              <td colSpan={2} className="px-4 py-2 font-bold">Assets</td>
-            </tr>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-left"></TableHead>
+              <TableHead className="text-right">{data.date}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow className="bg-muted/50">
+              <TableCell colSpan={2} className="font-bold">Assets</TableCell>
+            </TableRow>
             {renderItems(data.assets, nestedLevel)}
-            {data.assets.length !== 0 && <tr className="border-b border-muted-foreground/20">
-              <td className="px-4 py-2 text-right font-bold">Total Assets:</td>
-              <td className="px-4 py-2 text-right">{netWorth}</td>
-            </tr>}
-            <tr className="border-b border-muted-foreground/20 bg-muted/50">
-              <td colSpan={2} className="px-4 py-2 font-bold">Liabilities</td>
-            </tr>
+            {data.assets.length !== 0 && (
+              <TableRow>
+                <TableCell className="text-right font-bold">Total Assets:</TableCell>
+                <TableCell className="text-right">{netWorth}</TableCell>
+              </TableRow>
+            )}
+            <TableRow className="bg-muted/50">
+              <TableCell colSpan={2} className="font-bold">Liabilities</TableCell>
+            </TableRow>
             {data.liabilities.length === 0 ? (
-              <tr>
-                <td colSpan={2} className="px-4 py-2 text-center">No liabilities</td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={2} className="text-center">No liabilities</TableCell>
+              </TableRow>
             ) : (
               renderItems(data.liabilities, nestedLevel)
             )}
-            {data.liabilities.length !== 0 &&
-              <tr className="border-b border-muted-foreground/20">
-                <td className="px-4 py-2 text-right font-bold">Total Liabilities:</td>
-                <td className="px-4 py-2 text-right">0</td>
-              </tr>
-            }
-            <tr className="bg-muted/50">
-              <td className="px-4 py-2 text-right font-bold">Net Worth:</td>
-              <td className="px-4 py-2 text-right">{netWorth}</td>
-            </tr>
-          </tbody>
-        </table>
+            {data.liabilities.length !== 0 && (
+              <TableRow>
+                <TableCell className="text-right font-bold">Total Liabilities:</TableCell>
+                <TableCell className="text-right">0</TableCell>
+              </TableRow>
+            )}
+            <TableRow className="bg-muted/50">
+              <TableCell className="text-right font-bold">Net Worth:</TableCell>
+              <TableCell className="text-right">{netWorth}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
     </div>
   )
