@@ -100,8 +100,17 @@ export default function IncomeStatement() {
 
   const filteredData = useMemo(() => {
     if (selectedMonth === "total") {
-      return data;
+      return {
+        ...data,
+        revenues: data.revenues.filter((item) =>
+          item.date.startsWith(selectedYear.toString()),
+        ),
+        expenses: data.expenses.filter((item) =>
+          item.date.startsWith(selectedYear.toString()),
+        ),
+      };
     }
+
     return {
       ...data,
       revenues: data.revenues.filter((item) =>
