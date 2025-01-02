@@ -6,6 +6,8 @@ import {
 
 export async function fetchBalanceSheet(
   level: number,
+  // year: number = new Date().getFullYear(),
+  year: number = 2025,
 ): Promise<BalanceSheetData> {
   if (level < 1) {
     throw new Error("Invalid level");
@@ -17,37 +19,70 @@ export async function fetchBalanceSheet(
 
   // Declare a BalanceSheetData object
   const balanceSheetData: BalanceSheetData = {
-    date: new Date().toISOString().split("T")[0], // Replace with your actual date logic
+    date: year.toString(),
     assets: [],
     liabilities: [],
   };
 
-  const response = await fetch("/api/accounts");
-  const accountsData = await response.json();
+  const response = await fetch("/api/accountnames");
+  const accountNamesData = await response.json();
 
-  // Assuming your response structure is consistent, we process it
-  for (const account of accountsData) {
-    const assetName = account.aname;
+  const accountNames = [] as string[];
 
-    const assetLevel = assetName.split(":").length;
-    if (assetLevel !== level) {
+  for (const accountName of accountNamesData) {
+    if (accountName.split(":").length !== level) {
       continue;
     }
-
-    if ("asset" !== assetName.split(":")[0]) {
+    if (accountName.split(":")[0] !== "asset") {
       continue;
     }
+    accountNames.push(accountName);
+  }
 
-    for (const entry of account.aibalance) {
-      const currency = entry.acommodity;
-      const amount = entry.aquantity.floatingPoint; // Taking the floating point directly, concerning cost.
+  for (const accountName of accountNames) {
+    const response = await fetch(`/api/accounttransactions/${accountName}`);
+    const accountTransactionsData = await response.json();
 
-      if (amount == 0) {
+    const amountByCurrency = {} as Record<string, number>;
+
+    for (const transactions of accountTransactionsData) {
+      const transaction = transactions[0];
+
+      const date = transaction.tdate as string;
+
+      if (!date.startsWith(year.toString())) {
+        continue;
+      }
+
+      for (const posting of transaction.tpostings) {
+        if (!posting.paccount.startsWith(accountName)) {
+          continue;
+        }
+
+        if (posting.pamount.length === 0) {
+          continue;
+        }
+
+        const currency = posting.pamount[0].acommodity;
+        const amount = posting.pamount[0].aquantity.floatingPoint;
+
+        if (amountByCurrency[currency] === undefined) {
+          amountByCurrency[currency] = 0;
+        }
+
+        amountByCurrency[currency] += amount;
+      }
+    }
+
+    for (const currency of Object.keys(amountByCurrency)) {
+      const amount = amountByCurrency[currency];
+
+      if (amount === 0) {
         continue;
       }
 
       balanceSheetData.assets.push({
-        name: assetName,
+        name: accountName,
         amount: amount,
         currency: currency,
       });

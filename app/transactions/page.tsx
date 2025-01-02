@@ -37,6 +37,9 @@ export default function Transactions() {
   const [selectedMonth, setSelectedMonth] = useState(
     searchParams.get("month") || currentMonth,
   );
+  const [selectedYear, setSelectedYear] = useState(
+    searchParams.get("year") || currentYear.toString(),
+  );
   const [sortBy, setSortBy] = useState("date"); // New state for sorting
 
   useEffect(() => {
@@ -71,6 +74,15 @@ export default function Transactions() {
     updateURLParams({ month });
   };
 
+  const handleYearChange = (year: string) => {
+    setSelectedYear(year);
+    const newMonth =
+      selectedMonth === "total" ? "total" : year + selectedMonth.slice(4);
+
+    setSelectedMonth(newMonth);
+    updateURLParams({ year, month: newMonth });
+  };
+
   const handleSortChange = (sort: string) => {
     setSortBy(sort);
   };
@@ -99,6 +111,9 @@ export default function Transactions() {
       ) {
         return false;
       }
+      if (selectedYear && !transaction.date.startsWith(selectedYear)) {
+        return false;
+      }
       return true;
     });
 
@@ -115,7 +130,14 @@ export default function Transactions() {
     }
 
     return filtered.slice(0, 200);
-  }, [searchQuery, categoryFilter, transactions, selectedMonth, sortBy]);
+  }, [
+    searchQuery,
+    categoryFilter,
+    transactions,
+    selectedMonth,
+    sortBy,
+    selectedYear,
+  ]);
 
   return (
     <div className="space-y-6">
@@ -137,6 +159,15 @@ export default function Transactions() {
           value={categoryFilter}
           onChange={(e) => handleCategoryFilter(e.target.value)}
         />
+        <Select onValueChange={handleYearChange} value={selectedYear}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select year" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="2024">2024</SelectItem>
+            <SelectItem value="2025">2025</SelectItem>
+          </SelectContent>
+        </Select>
         <Select onValueChange={handleMonthChange} value={selectedMonth}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select month" />
@@ -144,7 +175,7 @@ export default function Transactions() {
           <SelectContent>
             <SelectItem value="total">Total</SelectItem>
             {Array.from({ length: 12 }, (_, i) => {
-              const date = new Date(currentYear, i, 15);
+              const date = new Date(parseInt(selectedYear, 10), i, 15);
               const monthStr = date.toISOString().slice(0, 7);
               return (
                 <SelectItem key={monthStr} value={monthStr}>
@@ -170,11 +201,15 @@ export default function Transactions() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="px-4 py-2 text-left w-[115px]">Date</TableHead>
+                <TableHead className="px-4 py-2 text-left w-[115px]">
+                  Date
+                </TableHead>
                 <TableHead className="px-4 py-2 text-left">
                   Description
                 </TableHead>
-                <TableHead className="px-4 py-2 text-right w-[150px]">Amount</TableHead>
+                <TableHead className="px-4 py-2 text-right w-[150px]">
+                  Amount
+                </TableHead>
                 <TableHead className="px-4 py-2 text-left">Category</TableHead>
                 <TableHead className="px-4 py-2 text-left">Account</TableHead>
               </TableRow>

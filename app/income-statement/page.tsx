@@ -75,6 +75,8 @@ export default function IncomeStatement() {
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
+  console.log(selectedYear, selectedMonth);
+
   useEffect(() => {
     fetchIncomeStatement().then(setData);
   }, []);
@@ -85,7 +87,11 @@ export default function IncomeStatement() {
 
   const handleYearChange = (year: string) => {
     const newYear = parseInt(year);
+    const newMonth =
+      selectedMonth === "total" ? "total" : `${year}${selectedMonth.slice(4)}`;
+
     setSelectedYear(newYear);
+    setSelectedMonth(newMonth);
   };
 
   const handleMonthChange = (month: string) => {
@@ -105,7 +111,7 @@ export default function IncomeStatement() {
         item.date.startsWith(selectedMonth),
       ),
     };
-  }, [data, selectedMonth]);
+  }, [data, selectedMonth, selectedYear]);
 
   const renderItems = (items: Expense[] | Revenue[], level: number) => {
     const groupedItems = groupByNestedLevel(items, level);
@@ -115,7 +121,7 @@ export default function IncomeStatement() {
       <TableRow key={index}>
         <TableCell className="text-left">
           <Link
-            href={`/transactions?category=${encodeURIComponent(item.name)}&month=${selectedMonth}`}
+            href={`/transactions?category=${encodeURIComponent(item.name)}&month=${selectedMonth}&year=${selectedYear}`}
             className="text-blue-500 hover:underline cursor-pointer"
           >
             {item.name}
@@ -159,7 +165,7 @@ export default function IncomeStatement() {
             ))}
           </SelectContent>
         </Select>
-        <Select onValueChange={handleMonthChange} defaultValue={selectedMonth}>
+        <Select onValueChange={handleMonthChange} value={selectedMonth}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select month" />
           </SelectTrigger>

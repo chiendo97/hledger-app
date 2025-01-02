@@ -18,4 +18,12 @@ GET http://127.0.0.1:5000/accountnames
 
 ###
 
+GET http://127.0.0.1:3000/api/accountnames
+
+###
+
 GET http://127.0.0.1:5000/accounttransactions/asset:apartment:tecco
+
+###
+
+GET http://127.0.0.1:3000/api/accounttransactions/asset:vietinbank:checking

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NestedLevelSelector } from "@/components/NestedLevelSelector";
 import { Asset, BalanceSheetData } from "../interfaces";
 import { fetchBalanceSheet } from "../apis";
@@ -12,13 +12,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Dummy data
 const balanceSheetData = {
-  date: "2024-12-26",
+  date: "",
   assets: [],
   liabilities: [],
 };
+
+const currentYear = new Date().getFullYear();
 
 function sortByAmountAndCurrency(
   items: {
@@ -31,7 +40,7 @@ function sortByAmountAndCurrency(
     if (a.currency !== b.currency) {
       return a.currency.localeCompare(b.currency);
     }
-    return b.amount - a.amount;
+    return a.name.localeCompare(b.name);
   });
 }
 
@@ -60,12 +69,21 @@ function groupByNestedLevel(items: Asset[], level: number) {
 export default function BalanceSheet() {
   const [data, setData] = useState<BalanceSheetData>(balanceSheetData);
   const [nestedLevel, setNestedLevel] = useState(2);
+  const [selectedYear, setSelectedYear] = useState(currentYear.toString());
+
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    fetchBalanceSheet(nestedLevel).then((data) => {
+    // Skip the effect on initial mount to avoid double fetching
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    fetchBalanceSheet(nestedLevel, parseInt(selectedYear, 10)).then((data) => {
       setData(data);
     });
-  }, [nestedLevel]);
+  }, [nestedLevel, selectedYear]);
 
   const handleLevelChange = (level: number) => {
     setNestedLevel(level);
@@ -104,6 +122,18 @@ export default function BalanceSheet() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Balance Sheet</h1>
       <NestedLevelSelector onLevelChange={handleLevelChange} />
+      <Select
+        onValueChange={setSelectedYear}
+        defaultValue={selectedYear.toString()}
+      >
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Select year" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="2024">2024</SelectItem>
+          <SelectItem value="2025">2025</SelectItem>
+        </SelectContent>
+      </Select>
       <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
