@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().toISOString().slice(0, 7);
@@ -41,11 +42,18 @@ export default function Transactions() {
     searchParams.get("year") || currentYear.toString(),
   );
   const [sortBy, setSortBy] = useState("date"); // New state for sorting
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchTransactions().then((transactions) => {
-      setTransactions(transactions);
-    });
+    fetchTransactions()
+      .then((result) => {
+        setTransactions(result);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching balance sheet:", error);
+        setIsLoading(false);
+      });
   }, []);
 
   const handleSearch = (query: string) => {
@@ -196,53 +204,60 @@ export default function Transactions() {
           </SelectContent>
         </Select>
       </div>
-      <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="px-4 py-2 text-left w-[115px]">
-                  Date
-                </TableHead>
-                <TableHead className="px-4 py-2 text-left">
-                  Description
-                </TableHead>
-                <TableHead className="px-4 py-2 text-right w-[150px]">
-                  Amount
-                </TableHead>
-                <TableHead className="px-4 py-2 text-left">Category</TableHead>
-                <TableHead className="px-4 py-2 text-left">Account</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedTransactions.map((transaction) => (
-                <TableRow
-                  key={transaction.id}
-                  className="border-b border-muted-foreground/20"
-                >
-                  <TableCell className="px-4 py-2">
-                    {transaction.date}
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
-                    {transaction.description}
-                  </TableCell>
-                  <TableCell
-                    className={`px-4 py-2 text-right ${transaction.amount < 0 ? "text-green-500" : "text-red-500"}`}
-                  >
-                    {transaction.amount.toLocaleString()} {transaction.currency}
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
-                    {transaction.category}
-                  </TableCell>
-                  <TableCell className="px-4 py-2">
-                    {transaction.account}
-                  </TableCell>
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="px-4 py-2 text-left w-[115px]">
+                    Date
+                  </TableHead>
+                  <TableHead className="px-4 py-2 text-left">
+                    Description
+                  </TableHead>
+                  <TableHead className="px-4 py-2 text-right w-[150px]">
+                    Amount
+                  </TableHead>
+                  <TableHead className="px-4 py-2 text-left">
+                    Category
+                  </TableHead>
+                  <TableHead className="px-4 py-2 text-left">Account</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {sortedTransactions.map((transaction) => (
+                  <TableRow
+                    key={transaction.id}
+                    className="border-b border-muted-foreground/20"
+                  >
+                    <TableCell className="px-4 py-2">
+                      {transaction.date}
+                    </TableCell>
+                    <TableCell className="px-4 py-2">
+                      {transaction.description}
+                    </TableCell>
+                    <TableCell
+                      className={`px-4 py-2 text-right ${transaction.amount < 0 ? "text-green-500" : "text-red-500"}`}
+                    >
+                      {transaction.amount.toLocaleString()}{" "}
+                      {transaction.currency}
+                    </TableCell>
+                    <TableCell className="px-4 py-2">
+                      {transaction.category}
+                    </TableCell>
+                    <TableCell className="px-4 py-2">
+                      {transaction.account}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

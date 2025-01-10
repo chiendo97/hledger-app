@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Spinner } from "@/components/ui/spinner";
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().toISOString().slice(0, 7);
@@ -74,11 +75,18 @@ export default function IncomeStatement() {
   const [nestedLevel, setNestedLevel] = useState(2);
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-
-  console.log(selectedYear, selectedMonth);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchIncomeStatement().then(setData);
+    fetchIncomeStatement()
+      .then((result) => {
+        setData(result);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching balance sheet:", error);
+        setIsLoading(false);
+      });
   }, []);
 
   const handleLevelChange = (level: number) => {
@@ -161,7 +169,7 @@ export default function IncomeStatement() {
         <NestedLevelSelector onLevelChange={handleLevelChange} />
         <Select
           onValueChange={handleYearChange}
-          defaultValue={selectedYear.toString()}
+          value={selectedYear.toString()}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select year" />
@@ -192,48 +200,52 @@ export default function IncomeStatement() {
           </SelectContent>
         </Select>
       </div>
-      <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-left">Category</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow className="bg-muted/50">
-              <TableCell colSpan={2} className="font-bold">
-                Revenues
-              </TableCell>
-            </TableRow>
-            {renderItems(filteredData.revenues, nestedLevel)}
-            <TableRow className="font-bold">
-              <TableCell className="text-right">Total Revenues:</TableCell>
-              <TableCell className="text-right">
-                {totalRevenues.toLocaleString()} vnd
-              </TableCell>
-            </TableRow>
-            <TableRow className="bg-muted/50">
-              <TableCell colSpan={2} className="font-bold">
-                Expenses
-              </TableCell>
-            </TableRow>
-            {renderItems(filteredData.expenses, nestedLevel)}
-            <TableRow className="font-bold">
-              <TableCell className="text-right">Total Expenses:</TableCell>
-              <TableCell className="text-right">
-                {totalExpenses.toLocaleString()} vnd
-              </TableCell>
-            </TableRow>
-            <TableRow className="bg-muted/50 font-bold">
-              <TableCell className="text-right">Net Income:</TableCell>
-              <TableCell className="text-right">
-                {netIncome.toLocaleString()} vnd
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-left">Category</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="bg-muted/50">
+                <TableCell colSpan={2} className="font-bold">
+                  Revenues
+                </TableCell>
+              </TableRow>
+              {renderItems(filteredData.revenues, nestedLevel)}
+              <TableRow className="font-bold">
+                <TableCell className="text-right">Total Revenues:</TableCell>
+                <TableCell className="text-right">
+                  {totalRevenues.toLocaleString()} vnd
+                </TableCell>
+              </TableRow>
+              <TableRow className="bg-muted/50">
+                <TableCell colSpan={2} className="font-bold">
+                  Expenses
+                </TableCell>
+              </TableRow>
+              {renderItems(filteredData.expenses, nestedLevel)}
+              <TableRow className="font-bold">
+                <TableCell className="text-right">Total Expenses:</TableCell>
+                <TableCell className="text-right">
+                  {totalExpenses.toLocaleString()} vnd
+                </TableCell>
+              </TableRow>
+              <TableRow className="bg-muted/50 font-bold">
+                <TableCell className="text-right">Net Income:</TableCell>
+                <TableCell className="text-right">
+                  {netIncome.toLocaleString()} vnd
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }

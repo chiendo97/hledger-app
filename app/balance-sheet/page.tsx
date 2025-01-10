@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 
 // Dummy data
 const balanceSheetData = {
@@ -70,6 +71,7 @@ export default function BalanceSheet() {
   const [data, setData] = useState<BalanceSheetData>(balanceSheetData);
   const [nestedLevel, setNestedLevel] = useState(2);
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
+  const [isLoading, setIsLoading] = useState(true);
 
   const isInitialMount = useRef(true);
 
@@ -80,7 +82,16 @@ export default function BalanceSheet() {
       return;
     }
 
-    fetchBalanceSheet(nestedLevel, parseInt(selectedYear, 10)).then(setData);
+    setIsLoading(true);
+    fetchBalanceSheet(nestedLevel, parseInt(selectedYear, 10))
+      .then((result) => {
+        setData(result);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching balance sheet:", error);
+        setIsLoading(false);
+      });
   }, [nestedLevel, selectedYear]);
 
   const handleLevelChange = (level: number) => {
@@ -94,7 +105,9 @@ export default function BalanceSheet() {
     return sortedItems.map((item, index: number) => (
       <TableRow key={index}>
         <TableCell className="text-left">{item.name}</TableCell>
-        <TableCell className="text-right text-green-500">
+        <TableCell
+          className={`text-right ${item.amount < 0 ? "text-red-500" : "text-green-500"}`}
+        >
           {item.amount.toLocaleString()} {item.currency}
         </TableCell>
       </TableRow>
@@ -119,71 +132,77 @@ export default function BalanceSheet() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Balance Sheet</h1>
-      <NestedLevelSelector onLevelChange={handleLevelChange} />
-      <Select
-        onValueChange={setSelectedYear}
-        defaultValue={selectedYear.toString()}
-      >
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select year" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="2024">2024</SelectItem>
-          <SelectItem value="2025">2025</SelectItem>
-        </SelectContent>
-      </Select>
-      <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="text-left"></TableHead>
-              <TableHead className="text-right">{data.date}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow className="bg-muted/50">
-              <TableCell colSpan={2} className="font-bold">
-                Assets
-              </TableCell>
-            </TableRow>
-            {renderItems(data.assets, nestedLevel)}
-            {data.assets.length !== 0 && (
+      <div className="flex flex-wrap gap-4">
+        <NestedLevelSelector onLevelChange={handleLevelChange} />
+        <Select onValueChange={setSelectedYear} value={selectedYear.toString()}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select year" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="2024">2024</SelectItem>
+            <SelectItem value="2025">2025</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
               <TableRow>
+                <TableHead className="text-left"></TableHead>
+                <TableHead className="text-right">{data.date}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="bg-muted/50">
+                <TableCell colSpan={2} className="font-bold">
+                  Assets
+                </TableCell>
+              </TableRow>
+              {renderItems(data.assets, nestedLevel)}
+              {data.assets.length !== 0 && (
+                <TableRow>
+                  <TableCell className="text-right font-bold">
+                    Total Assets:
+                  </TableCell>
+                  <TableCell className="text-right">{netWorth}</TableCell>
+                </TableRow>
+              )}
+              <TableRow className="bg-muted/50">
+                <TableCell colSpan={2} className="font-bold">
+                  Liabilities
+                </TableCell>
+              </TableRow>
+              {data.liabilities.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center">
+                    No liabilities
+                  </TableCell>
+                </TableRow>
+              ) : (
+                renderItems(data.liabilities, nestedLevel)
+              )}
+              {data.liabilities.length !== 0 && (
+                <TableRow>
+                  <TableCell className="text-right font-bold">
+                    Total Liabilities:
+                  </TableCell>
+                  <TableCell className="text-right">0</TableCell>
+                </TableRow>
+              )}
+              <TableRow className="bg-muted/50">
                 <TableCell className="text-right font-bold">
-                  Total Assets:
+                  Net Worth:
                 </TableCell>
                 <TableCell className="text-right">{netWorth}</TableCell>
               </TableRow>
-            )}
-            <TableRow className="bg-muted/50">
-              <TableCell colSpan={2} className="font-bold">
-                Liabilities
-              </TableCell>
-            </TableRow>
-            {data.liabilities.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={2} className="text-center">
-                  No liabilities
-                </TableCell>
-              </TableRow>
-            ) : (
-              renderItems(data.liabilities, nestedLevel)
-            )}
-            {data.liabilities.length !== 0 && (
-              <TableRow>
-                <TableCell className="text-right font-bold">
-                  Total Liabilities:
-                </TableCell>
-                <TableCell className="text-right">0</TableCell>
-              </TableRow>
-            )}
-            <TableRow className="bg-muted/50">
-              <TableCell className="text-right font-bold">Net Worth:</TableCell>
-              <TableCell className="text-right">{netWorth}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }
