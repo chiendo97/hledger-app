@@ -6,8 +6,7 @@ import {
 
 export async function fetchBalanceSheet(
   level: number,
-  // year: number = new Date().getFullYear(),
-  year: number = 2025,
+  year: number = new Date().getFullYear(),
 ): Promise<BalanceSheetData> {
   if (level < 1) {
     throw new Error("Invalid level");
@@ -50,7 +49,7 @@ export async function fetchBalanceSheet(
 
       const date = transaction.tdate as string;
 
-      if (!date.startsWith(year.toString())) {
+      if (!date.startsWith("1997") && !date.startsWith(year.toString())) {
         continue;
       }
 

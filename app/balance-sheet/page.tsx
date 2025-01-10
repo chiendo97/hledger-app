@@ -80,9 +80,7 @@ export default function BalanceSheet() {
       return;
     }
 
-    fetchBalanceSheet(nestedLevel, parseInt(selectedYear, 10)).then((data) => {
-      setData(data);
-    });
+    fetchBalanceSheet(nestedLevel, parseInt(selectedYear, 10)).then(setData);
   }, [nestedLevel, selectedYear]);
 
   const handleLevelChange = (level: number) => {
