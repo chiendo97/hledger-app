@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { NestedLevelSelector } from "@/components/NestedLevelSelector";
 import { Asset, BalanceSheetData } from "../interfaces";
 import { fetchBalanceSheet } from "../apis";
@@ -73,15 +73,7 @@ export default function BalanceSheet() {
   const [selectedYear, setSelectedYear] = useState(currentYear.toString());
   const [isLoading, setIsLoading] = useState(true);
 
-  const isInitialMount = useRef(true);
-
   useEffect(() => {
-    // Skip the effect on initial mount to avoid double fetching
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-
     setIsLoading(true);
     fetchBalanceSheet(nestedLevel, parseInt(selectedYear, 10))
       .then((result) => {
@@ -93,10 +85,6 @@ export default function BalanceSheet() {
         setIsLoading(false);
       });
   }, [nestedLevel, selectedYear]);
-
-  const handleLevelChange = (level: number) => {
-    setNestedLevel(level);
-  };
 
   const renderItems = (items: Asset[], level: number) => {
     const groupedItems = groupByNestedLevel(items, level);
@@ -133,7 +121,7 @@ export default function BalanceSheet() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Balance Sheet</h1>
       <div className="flex flex-wrap gap-4">
-        <NestedLevelSelector onLevelChange={handleLevelChange} />
+        <NestedLevelSelector onLevelChange={setNestedLevel} />
         <Select onValueChange={setSelectedYear} value={selectedYear.toString()}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select year" />
