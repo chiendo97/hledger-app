@@ -4,6 +4,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -147,6 +148,21 @@ export default function Transactions() {
     selectedYear,
   ]);
 
+  const transactionByCurrency = sortedTransactions.reduce(
+    (byCurrency, asset) => {
+      if (!byCurrency[asset.currency]) {
+        byCurrency[asset.currency] = 0;
+      }
+      byCurrency[asset.currency] += asset.amount;
+      return byCurrency;
+    },
+    {} as Record<string, number>,
+  );
+
+  const totalTransaction = Object.entries(transactionByCurrency)
+    .map(([currency, amount]) => `${amount.toLocaleString()} ${currency}`)
+    .join(", ");
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Transactions</h1>
@@ -254,6 +270,17 @@ export default function Transactions() {
                   </TableRow>
                 ))}
               </TableBody>
+              <TableFooter>
+                <TableRow className="font-semibold">
+                  <TableCell colSpan={2} className="px-4 py-2 text-left">
+                    Total
+                  </TableCell>
+                  <TableCell className="px-4 py-2 text-right">
+                    {totalTransaction}
+                  </TableCell>
+                  <TableCell colSpan={2}></TableCell>
+                </TableRow>
+              </TableFooter>
             </Table>
           </div>
         </div>
