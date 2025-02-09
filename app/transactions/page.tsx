@@ -299,7 +299,7 @@ export default function Transactions() {
               </div>
 
               {/* Split Details - Same for both layouts */}
-              {transaction.splits && (
+              {transaction.splits.length > 0 && (
                 <div className="mt-3 pl-8 md:pl-12 space-y-2">
                   <p className="text-sm text-gray-500 font-medium">
                     Split Details:
