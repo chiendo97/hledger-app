@@ -31,6 +31,12 @@ export interface IncomeStatementData {
   expenses: Expense[]; // Array of expenses
 }
 
+export interface Split {
+  category: string;
+  amount: number;
+  currency: string;
+}
+
 export interface TransactionData {
   index: number;
   date: string; // Date of the transaction
@@ -40,4 +46,5 @@ export interface TransactionData {
   currency: string; // Currency code (e.g., 'vnd')
   category: string; // Category that the transaction belongs to
   account: string; // Account related to the transaction
+  splits: Split[]; // Array of splits for the transaction
 }

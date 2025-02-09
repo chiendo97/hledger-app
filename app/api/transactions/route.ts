@@ -1,4 +1,4 @@
-import { IncomeStatementData, TransactionData } from "@/app/interfaces";
+import { IncomeStatementData, TransactionData, Split } from "@/app/interfaces";
 import { forwardRequest } from "../utils";
 
 export async function GET(request: Request) {
@@ -65,14 +65,30 @@ export async function GET(request: Request) {
 
     // Assuming your response structure is consistent, we process it
     for (const transaction of transactionsData) {
-      if (transaction.tpostings.length !== 2) {
+      if (transaction.ttags.length === 0) {
         continue;
+      }
+
+      const splits: Split[] = []; // Array of splits for the transaction
+      if (transaction.tpostings.length !== 2) {
+        for (const post of transaction.tpostings) {
+          const category = post.paccount;
+          const currency = post.pamount[0].acommodity;
+          const amount = post.pamount[0].aquantity.floatingPoint;
+
+          splits.push({
+            category: category,
+            amount: amount,
+            currency: currency,
+          });
+        }
       }
 
       const date = transaction.tdate;
       const description = transaction.tdescription;
-      const posting = transaction.tpostings[0];
+      const posting = transaction.tpostings[transaction.tpostings.length - 1];
       const index = transaction.tindex;
+
       const transactionID =
         transaction.ttags[transaction.ttags.length - 1][
           transaction.ttags[transaction.ttags.length - 1].length - 1
@@ -82,8 +98,9 @@ export async function GET(request: Request) {
         continue;
       }
 
-      const category = posting.paccount;
-      const account = transaction.tpostings[1].paccount;
+      const category = transaction.tpostings[0].paccount;
+      const account =
+        transaction.tpostings[transaction.tpostings.length - 1].paccount;
       const currency = posting.pamount[0].acommodity;
       const amount = posting.pamount[0].aquantity.floatingPoint;
 
@@ -92,10 +109,11 @@ export async function GET(request: Request) {
         date: date,
         id: transactionID,
         description: description,
-        amount: amount,
+        amount: -amount,
         currency: currency,
         category: category,
         account: account,
+        splits: splits,
       });
     }
 

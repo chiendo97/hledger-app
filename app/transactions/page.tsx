@@ -1,15 +1,5 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -23,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { ArrowUpRight, ArrowDownLeft, Circle } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().toISOString().slice(0, 7);
@@ -159,9 +150,27 @@ export default function Transactions() {
     {} as Record<string, number>,
   );
 
+  const formatCurrency = (amount: number, currency: string) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: currency,
+    }).format(Math.abs(amount));
+  };
+
   const totalTransaction = Object.entries(transactionByCurrency)
-    .map(([currency, amount]) => `${amount.toLocaleString()} ${currency}`)
+    .map(([currency, amount]) => `${formatCurrency(amount, currency)}`)
     .join(", ");
+
+  const getTransactionIcon = (type: string, amount: number) => {
+    if (type === "transfer")
+      return <Circle className="w-5 h-5 text-blue-500" />;
+
+    return amount > 0 ? (
+      <ArrowUpRight className="w-5 h-5 text-red-500" />
+    ) : (
+      <ArrowDownLeft className="w-5 h-5 text-green-500" />
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -223,68 +232,95 @@ export default function Transactions() {
       {isLoading ? (
         <Spinner />
       ) : (
-        <div className="bg-card text-card-foreground shadow-lg rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="px-4 py-2 text-left w-[115px]">
-                    Date
-                  </TableHead>
-                  <TableHead className="px-4 py-2 text-left">
-                    Description
-                  </TableHead>
-                  <TableHead className="px-4 py-2 text-right w-[150px]">
-                    Amount
-                  </TableHead>
-                  <TableHead className="px-4 py-2 text-left">
-                    Category
-                  </TableHead>
-                  <TableHead className="px-4 py-2 text-left">Account</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedTransactions.map((transaction) => (
-                  <TableRow
-                    key={transaction.id}
-                    className="border-b border-muted-foreground/20"
-                  >
-                    <TableCell className="px-4 py-2">
-                      {transaction.date}
-                    </TableCell>
-                    <TableCell className="px-4 py-2">
+        <div className="space-y-4">
+          {sortedTransactions.map((transaction) => (
+            <div
+              key={transaction.id}
+              className="p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              {/* Mobile Layout */}
+              <div className="md:hidden space-y-3">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-600 break-all">
                       {transaction.description}
-                    </TableCell>
-                    <TableCell
-                      className={`px-4 py-2 text-right ${transaction.amount < 0 ? "text-green-500" : "text-red-500"}`}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {transaction.date} • {transaction.id}
+                    </p>
+                  </div>
+                </div>
+                <div className="pl-8">
+                  <p
+                    className={`text-base font-medium ${transaction.amount > 0 ? "text-red-600" : "text-green-600"}`}
+                  >
+                    {formatCurrency(transaction.amount, transaction.currency)}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {transaction.category}
+                  </p>
+                  <p className="text-sm text-gray-500">{transaction.account}</p>
+                </div>
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden md:block">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-4 flex-1 min-w-0">
+                    <div className="mt-1">
+                      {getTransactionIcon(
+                        transaction.category,
+                        transaction.amount,
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-600 break-all">
+                        {transaction.description}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {transaction.date} • {transaction.id}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {transaction.category}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="ml-4 text-right shrink-0">
+                    <p
+                      className={`font-medium ${transaction.amount > 0 ? "text-red-600" : "text-green-600"}`}
                     >
-                      {transaction.amount.toLocaleString()}{" "}
-                      {transaction.currency}
-                    </TableCell>
-                    <TableCell className="px-4 py-2">
-                      {transaction.category}
-                    </TableCell>
-                    <TableCell className="px-4 py-2">
+                      {formatCurrency(transaction.amount, transaction.currency)}
+                    </p>
+                    <p className="text-sm text-gray-500">
                       {transaction.account}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow className="font-semibold">
-                  <TableCell colSpan={2} className="px-4 py-2 text-left">
-                    Total
-                  </TableCell>
-                  <TableCell className="px-4 py-2 text-right">
-                    {totalTransaction}
-                  </TableCell>
-                  <TableCell colSpan={2}></TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
-          </div>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Split Details - Same for both layouts */}
+              {transaction.splits && (
+                <div className="mt-3 pl-8 md:pl-12 space-y-2">
+                  <p className="text-sm text-gray-500 font-medium">
+                    Split Details:
+                  </p>
+                  {transaction.splits.map((split, index) => (
+                    <div key={index} className="flex justify-between text-sm">
+                      <span className="text-gray-600">{split.category}</span>
+                      <span className="text-gray-600">
+                        {formatCurrency(split.amount, split.currency)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
+      <div className="mt-4 text-center">
+        <p className="font-semibold">Total: {totalTransaction}</p>
+      </div>
     </div>
   );
 }
