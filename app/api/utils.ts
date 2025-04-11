@@ -1,4 +1,4 @@
-export const API_BASE_URL = process.env.API_BASE_URL || "http://127.0.0.1:5000";
+export const API_BASE_URL = process.env.API_BASE_URL || "http://127.0.0.1:5001";
 
 export async function forwardRequest(request: Request, endpoint: string) {
   const url = `${API_BASE_URL}${endpoint}`;

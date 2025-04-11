@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { ArrowUpRight, ArrowDownLeft, Circle } from "lucide-react";
+import TransactionsList from "./transaction";
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().toISOString().slice(0, 7);
@@ -232,91 +233,7 @@ export default function Transactions() {
       {isLoading ? (
         <Spinner />
       ) : (
-        <div className="space-y-4">
-          {sortedTransactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              className="p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              {/* Mobile Layout */}
-              <div className="md:hidden space-y-3">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-600 break-all">
-                      {transaction.description}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {transaction.date} • {transaction.id}
-                    </p>
-                  </div>
-                </div>
-                <div className="pl-8">
-                  <p
-                    className={`text-base font-medium ${transaction.amount > 0 ? "text-red-600" : "text-green-600"}`}
-                  >
-                    {formatCurrency(transaction.amount, transaction.currency)}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {transaction.category}
-                  </p>
-                  <p className="text-sm text-gray-500">{transaction.account}</p>
-                </div>
-              </div>
-
-              {/* Desktop Layout */}
-              <div className="hidden md:block">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1 min-w-0">
-                    <div className="mt-1">
-                      {getTransactionIcon(
-                        transaction.category,
-                        transaction.amount,
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-600 break-all">
-                        {transaction.description}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {transaction.date} • {transaction.id}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {transaction.category}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="ml-4 text-right shrink-0">
-                    <p
-                      className={`font-medium ${transaction.amount > 0 ? "text-red-600" : "text-green-600"}`}
-                    >
-                      {formatCurrency(transaction.amount, transaction.currency)}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {transaction.account}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Split Details - Same for both layouts */}
-              {transaction.splits.length > 0 && (
-                <div className="mt-3 pl-8 md:pl-12 space-y-2">
-                  <p className="text-sm text-gray-500 font-medium">
-                    Split Details:
-                  </p>
-                  {transaction.splits.map((split, index) => (
-                    <div key={index} className="flex justify-between text-sm">
-                      <span className="text-gray-600">{split.category}</span>
-                      <span className="text-gray-600">
-                        {formatCurrency(split.amount, split.currency)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        <TransactionsList transactions={sortedTransactions} />
       )}
       <div className="mt-4 text-center">
         <p className="font-semibold">Total: {totalTransaction}</p>
